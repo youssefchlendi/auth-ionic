@@ -1,0 +1,7 @@
+{
+  "name": "auth-ionic",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
