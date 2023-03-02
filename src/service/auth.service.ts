@@ -3,8 +3,22 @@ import { useServiceStore } from '../store/service.store';
 
 
 export class AuthService{
-	static async Register(name: string, email: string, password: string) {
-		return;
+	static async Register(serviceUri: string, name: string, email: string, password: string) {
+		try {
+			const response = await axios.post(`${serviceUri}/api/register`, {
+				name,
+				email,
+				password
+			},
+			{
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			return response.data;
+		} catch (error:any) {
+			return error?.response?.data??null;
+		}
 	}
 
 	static async Login(serviceUri: string, email: string, password: string) {
@@ -20,7 +34,7 @@ export class AuthService{
 			});
 			return response.data;
 		} catch (error:any) {
-			return error.response.data;
+			return error?.response?.data??null;
 		}
 	}
 } 
