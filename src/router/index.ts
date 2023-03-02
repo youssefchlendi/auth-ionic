@@ -5,6 +5,8 @@ import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import { useAuthStore } from '@/store/auth.store';
 import { pinia } from '@/main';
+import TabsPage from '../views/docs/TabsPage.vue'
+import sig from '../views/docs/SignaturesPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
 	{
@@ -34,6 +36,28 @@ const routes: Array<RouteRecordRaw> = [
 		meta: {
 			requiresAuth: true
 		}
+	},
+	{
+		path: '/signatures',
+		component: sig,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/files',
+		component: () => import('@/views/docs/FilesPage.vue'),
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/signandpreviewfile/:id',
+		name: 'SignAndPreviewFile',
+		component: () => import('@/views/docs/SignAndPreviewFile.vue'),
+		meta: {
+			requiresAuth: true
+		}
 	}
 
 ]
@@ -53,7 +77,7 @@ router.beforeEach((to, from, next) => {
 		} else {
 			next()
 		}
-	}else if (to.matched.some(record => record.meta.requiresNotAuth)) {
+	} else if (to.matched.some(record => record.meta.requiresNotAuth)) {
 		if (authStore.isLoggedIn) {
 			next({
 				path: '/home',
@@ -62,7 +86,7 @@ router.beforeEach((to, from, next) => {
 		} else {
 			next()
 		}
-	}else {
+	} else {
 		next()
 	}
 })

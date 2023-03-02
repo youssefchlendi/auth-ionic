@@ -25,11 +25,13 @@ import './theme/variables.css';
 import { createPinia } from 'pinia'
 
 export const pinia = createPinia()
+import { VueSignaturePad } from "vue-signature-pad";
 
 const app = createApp(App)
   .use(pinia)
   .use(IonicVue)
   .use(router);
+app.component("VueSignaturePad", VueSignaturePad);
 
 app.component('master-layout', MasterLayout);  
 router.isReady().then(() => {
