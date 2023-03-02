@@ -1,7 +1,7 @@
 import { User } from '@/models/user.model';
 import { AuthService } from '@/service/auth.service';
 import { defineStore } from 'pinia'
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useServiceStore } from './service.store';
 
 export const useAuthStore = defineStore('auth',() => {
@@ -9,6 +9,11 @@ export const useAuthStore = defineStore('auth',() => {
 	const token = ref<string | null>(localStorage.getItem('token'));
 	const user = ref<User | null>(JSON.parse(localStorage.getItem('user') || 'null'));
 	const loginErrors = ref<any>();
+	
+	const isLoggedIn = computed(() => {
+		return token.value !== null && user.value !== null;
+	})
+	
 	const setToken = (tkn: string|null) => {
 		token.value = tkn;
 		if(tkn === null) {
@@ -58,7 +63,8 @@ export const useAuthStore = defineStore('auth',() => {
 		login,
 		register,
 		logout,
-		loginErrors
+		loginErrors,
+		isLoggedIn
 	}
 
 
