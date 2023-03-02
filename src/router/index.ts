@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
+import RegisterPage from '../views/RegisterPage.vue'
 import { useAuthStore } from '@/store/auth.store';
 import { pinia } from '@/main';
 
@@ -14,6 +15,14 @@ const routes: Array<RouteRecordRaw> = [
 		path: '/login',
 		name: 'Login',
 		component: LoginPage,
+		meta: {
+			requiresNotAuth: true
+		}
+	},
+	{
+		path: '/register',
+		name: 'Register',
+		component: RegisterPage,
 		meta: {
 			requiresNotAuth: true
 		}
