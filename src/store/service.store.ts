@@ -5,12 +5,17 @@ export const useServiceStore = defineStore('service',() => {
 	const serviceUri = ref<string | null>(localStorage.getItem('serviceUri'));
 
 	const setServiceUri = (uri: string|null) => {
-		serviceUri.value = uri;
-		if(uri === null) {
-			localStorage.removeItem('serviceUri');
-			return;
+		try {
+			serviceUri.value = uri;
+			if(uri === null) {
+				localStorage.removeItem('serviceUri');
+				return;
+			}
+			localStorage.setItem('serviceUri', uri);
+			return true;
+		} catch (e) {
+			return false;
 		}
-		localStorage.setItem('serviceUri', uri);
 	}
 
 	return {
