@@ -9,7 +9,7 @@ import { pinia } from '@/main';
 const routes: Array<RouteRecordRaw> = [
 	{
 		path: '/',
-		redirect: '/service-details'
+		redirect: '/login'
 	},
 	{
 		path: '/login',

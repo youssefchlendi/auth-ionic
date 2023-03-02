@@ -41,7 +41,7 @@
 					
 					
 				</ion-card-content>
-				<ion-row class="ion-padding">
+				<ion-row class="ion-padding" v-if="submittedUri">
 					<ion-col>
 						<span class="small-text">Don't have an account? </span>
 						<router-link to="/register" class="small-text"> Register</router-link>
