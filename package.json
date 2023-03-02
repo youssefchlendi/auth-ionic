@@ -20,10 +20,13 @@
     "@ionic/vue-router": "^6.0.0",
     "axios": "^1.3.4",
     "core-js": "^3.6.5",
+    "fabric": "^5.3.0",
     "ionicons": "^6.0.3",
     "pinia": "^2.0.32",
     "vue": "^3.2.21",
-    "vue-router": "^4.0.12"
+    "vue-pdf-embed": "^1.1.5",
+    "vue-router": "^4.0.12",
+    "vue-signature-pad": "^3.0.2"
   },
   "devDependencies": {
     "@capacitor/cli": "4.7.0",
