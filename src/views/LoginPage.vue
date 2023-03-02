@@ -1,5 +1,5 @@
 <template>
-	<master-layout pageTitle="Service Form">
+	<master-layout pageTitle="Login">
 		<div class="centered">
 			<!-- centered -->
 			<ion-card style="width:100%" elevation="2">
@@ -36,17 +36,25 @@
 						</ion-item>
 						<!-- users submit -->
 
+						<!-- don't have an account -->
 					</template>
-
-
-
+					
+					
 				</ion-card-content>
+				<ion-row class="ion-padding">
+					<ion-col>
+						<span class="small-text">Don't have an account? </span>
+						<router-link to="/register" class="small-text"> Register</router-link>
+					</ion-col>
+				</ion-row>
 				<ion-button expand="full" @click="submitUri" v-if="!submittedUri"
 					:disabled="!serviceUri.valid">Submit</ion-button>
-					<ion-buttons class="ion-padding ion-justify-content-center" v-if="submittedUri">
-						<ion-button expand="full" fill="outline" color="danger" shape="round" @click="cancel">cancel</ion-button>
-						<ion-button expand="block"  fill="solid" color="success" shape="round" :disabled="!valid" @click="login">Login</ion-button>
-					</ion-buttons>
+				<ion-buttons class="ion-padding ion-justify-content-center" v-if="submittedUri">
+					<ion-button expand="full" fill="outline" color="danger" shape="round"
+						@click="cancel">cancel</ion-button>
+					<ion-button expand="block" fill="solid" color="success" shape="round" :disabled="!valid"
+						@click="login">Login</ion-button>
+				</ion-buttons>
 			</ion-card>
 		</div>
 	</master-layout>
@@ -55,7 +63,7 @@
 <script lang="ts">
 import { useServiceStore } from "@/store/service.store";
 import {
-	IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonNote, IonButtons,toastController 
+	IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonNote, IonButtons, toastController, IonCol, IonRow
 } from "@ionic/vue";
 import { useRouter } from 'vue-router';
 import { defineComponent } from 'vue';
@@ -71,7 +79,9 @@ export default defineComponent({
 		IonCardTitle,
 		IonCardContent,
 		IonNote,
-		IonButtons
+		IonButtons,
+		IonRow,
+		IonCol
 	},
 	setup() {
 		const serviceStore = useServiceStore();
@@ -156,7 +166,7 @@ export default defineComponent({
 			} else {
 				this.authStore.loginErrors.errors ? Object.entries(this.authStore.loginErrors.errors).forEach((error: any) => {
 					console.log(error);
-					console.log(error[0]==="password");
+					console.log(error[0] === "password");
 					console.log(error[1][0]);
 					if (error[0] === "email") this.userInfo.email.validationMessage = error[1][0];
 					if (error[0] === "password") this.userInfo.password.validationMessage = error[1][0];
@@ -208,7 +218,6 @@ export default defineComponent({
 			}
 		},
 		cancel() {
-			this.serviceUri.value = '';
 			this.serviceUri.valid = false;
 			this.submittedUri = false;
 			(this.$refs.item as any).$el.classList.remove('ion-valid');

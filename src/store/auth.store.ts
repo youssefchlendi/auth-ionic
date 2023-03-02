@@ -2,6 +2,7 @@ import { User } from '@/models/user.model';
 import { AuthService } from '@/service/auth.service';
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useServiceStore } from './service.store';
 
 export const useAuthStore = defineStore('auth',() => {
@@ -53,8 +54,13 @@ export const useAuthStore = defineStore('auth',() => {
 	}
 
 	const logout = () => {
-		setToken(null);
-		setUser(null);
+		try {
+			setToken(null);
+			setUser(null);
+			return true;
+		} catch (error) {
+			return false;
+		}
 	}
 
 	return {
