@@ -15,6 +15,10 @@ export const useAuthStore = defineStore('auth',() => {
 	const isLoggedIn = computed(() => {
 		return token.value !== null && user.value !== null;
 	})
+
+	const canSignDocuments = computed(() => {
+		return isLoggedIn.value && user.value?.role === "editor";
+	})
 	
 	const setToken = (tkn: string|null) => {
 		token.value = tkn;
@@ -54,11 +58,11 @@ export const useAuthStore = defineStore('auth',() => {
 			
 	}
 
-	const register = async (name: string, email: string, password: string) => {
+	const register = async (name: string, email: string, password: string, role: string) => {
 		const serviceUri = useServiceStore().serviceUri;
 		if(!serviceUri) return;
 
-		const res = await AuthService.Register(serviceUri, name, email, password);
+		const res = await AuthService.Register(serviceUri, name, email, password, role);
 		if(!res){
 			registerErrors.value.message = "Unable to connect to service"
 			return false;
@@ -91,7 +95,8 @@ export const useAuthStore = defineStore('auth',() => {
 		logout,
 		loginErrors,
 		registerErrors,
-		isLoggedIn
+		isLoggedIn,
+		canSignDocuments
 	}
 
 

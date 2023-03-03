@@ -3,7 +3,7 @@
 		<div class="centered">
 			<!-- centered -->
 			<ion-card style="width:100%" elevation="2">
-				
+
 				<ion-card-header>
 					<ion-card-title>Register</ion-card-title>
 				</ion-card-header>
@@ -32,6 +32,17 @@
 							v-model="userInfo.password.value"></ion-input>
 						<ion-note slot="helper">Enter a your password</ion-note>
 						<ion-note slot="error">{{ userInfo.password.validationMessage }}</ion-note>
+					</ion-item>
+
+					<!--  role selection reader or editor -->
+					<ion-item :class="userInfo.role.validationMessage != '' ? 'ion-invalid' : 'ion-valid'">
+						<ion-label position="floating">Role</ion-label>
+						<ion-select :selected-text="userInfo.role.value??null" interface="action-sheet" v-model="userInfo.role.value" placeholder="Select your role">
+							<ion-select-option  value="reader">Reader</ion-select-option>
+							<ion-select-option  value="editor">Editor</ion-select-option>
+						</ion-select>
+						<ion-note slot="helper">Select your role</ion-note>
+						<ion-note slot="error">{{ userInfo.role.validationMessage }}</ion-note>
 					</ion-item>
 
 				</ion-card-content>
@@ -84,6 +95,11 @@ export default defineComponent({
 				validationMessage: "",
 				touched: false,
 			},
+			role: {
+				value: "reader",
+				validationMessage: "",
+				touched: false,
+			}
 		})
 		const loginMessage = ref("")
 		const submittedUri = ref(false)
@@ -93,7 +109,7 @@ export default defineComponent({
 		}
 
 		const valid = computed(() => {
-			if (userInfo.value.email.validationMessage === "" && userInfo.value.password.validationMessage === "" && userInfo.value.name.validationMessage === "") {
+			if (userInfo.value.email.validationMessage === "" && userInfo.value.password.validationMessage === "" && userInfo.value.name.validationMessage === "" && userInfo.value.role.validationMessage === "") {
 				return true;
 			} else {
 				return false;
@@ -114,6 +130,9 @@ export default defineComponent({
 			if (field === "name") {
 				userInfo.value.name.touched = true;
 			}
+			if (field === "role") {
+				userInfo.value.role.touched = true;
+			}
 		}
 
 
@@ -122,9 +141,10 @@ export default defineComponent({
 			validate("email");
 			validate("password");
 			validate("name");
+			validate("role");
 			if (!valid.value) return;
 
-			const res = await authStore.register(userInfo.value.name.value, userInfo.value.email.value, userInfo.value.password.value);
+			const res = await authStore.register(userInfo.value.name.value, userInfo.value.email.value, userInfo.value.password.value, userInfo.value.role.value);
 			if (res) {
 				toastController.create({
 					message: "Registered Successfully, You'll be redirected soon",
@@ -140,6 +160,7 @@ export default defineComponent({
 					if (error[0] === "email") userInfo.value.email.validationMessage = error[1][0];
 					if (error[0] === "password") userInfo.value.password.validationMessage = error[1][0];
 					if (error[0] === "name") userInfo.value.name.validationMessage = error[1][0];
+					if (error[0] === "role") userInfo.value.role.validationMessage = error[1][0];
 				}) : null;
 
 				loginMessage.value = authStore.registerErrors.message;
@@ -153,10 +174,12 @@ export default defineComponent({
 		}
 
 		const validateEmail = function (email: string) {
+			if (email === "") return true;
 			return email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g);
 		}
 
 		const validatePassword = function (password: string) {
+			if (password === "") return true;
 			return true || password.match(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{7,}$/);
 		}
 
@@ -182,14 +205,23 @@ export default defineComponent({
 					userInfo.value.name.validationMessage = "";
 				}
 			}
+			if (field === "role") {
+				if (userInfo.value.role.value === "") {
+					userInfo.value.role.validationMessage = "Role is required";
+				} else {
+					userInfo.value.role.validationMessage = "";
+				}
+			}
 
 		}
 
 		const cancel = function () {
-			if (userInfo.value.email.value !== "" || userInfo.value.password.value !== "" || userInfo.value.name.value !== ""){
+			if (userInfo.value.email.value !== "" || userInfo.value.password.value !== "" || userInfo.value.name.value !== "") {
 				userInfo.value.email.value = "";
 				userInfo.value.password.value = "";
 				userInfo.value.name.value = "";
+				userInfo.value.role.value = "reader";
+
 				return;
 			}
 			goToLogin();

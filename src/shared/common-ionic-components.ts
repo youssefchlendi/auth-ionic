@@ -21,7 +21,9 @@ import {
 	IonButtons,
 	IonItem,
 	IonLabel,
-	IonNote
+	IonNote,
+	IonSelectOption,
+	IonSelect
 } from '@ionic/vue';
 
 export default {
@@ -47,5 +49,7 @@ export default {
 	IonNote,
 	IonLabel,
 	IonItem,
-	IonButtons
+	IonButtons,
+	IonSelect,
+	IonSelectOption,
 };
