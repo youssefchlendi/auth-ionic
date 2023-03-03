@@ -17,7 +17,7 @@
 				{{ file.name }}
 
 				<ion-buttons slot="end">
-					<ion-button :router-link="{ name: 'SignAndPreviewFile', params: { id: file.id } }">Preview and sign</ion-button>
+					<ion-button @click="goToFile(file.id)" >Preview and sign</ion-button>
 					<ion-button @click="deleteFile(file)">Delete</ion-button>
 				</ion-buttons>
 			</ion-item>
@@ -27,14 +27,16 @@
 </template>
 
 <script setup lang="ts">
-import { toastController, alertController, IonButtons, IonList, modalController, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonItem, IonCardHeader, IonCardTitle, IonButton } from '@ionic/vue';
+import { toastController, alertController, IonButtons, IonList, modalController, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonItem, IonCardHeader, IonCardTitle, IonButton, useIonRouter } from '@ionic/vue';
 import { ref } from 'vue';
 import FileForm from '@/components/files/fileForm.vue';
 import { useFilesStore } from '@/store/files.store';
 import { File } from "@/models/Files.model";
+import { goLeftAnimation, goRightAnimation } from '@/utils/animations';
 const pdfFile = ref<string | null>(null);
 const filename = ref<string | null>(null);
 const store = useFilesStore();
+const router = useIonRouter();
 
 const convert64 = (e: any) => {
 	const file = e?.target?.files[0];
@@ -111,6 +113,11 @@ const deleteFile = async (file: File) => {
 		],
 	});
 	await alert.present();
+}
+
+
+const goToFile = (id: number) => {
+	router.push(`/signandpreviewfile/${id}`,goLeftAnimation);
 }
 
 </script>

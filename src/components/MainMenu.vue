@@ -10,10 +10,10 @@
 				<ion-button expand="block" @click="goTo('/home')">Home</ion-button>
 			</ion-menu-toggle>
 			<ion-menu-toggle>
-			<ion-button expand="block" @click="goTo('/signatures')">Signatures</ion-button>
+				<ion-button expand="block" @click="goTo('/signatures')">Signatures</ion-button>
 			</ion-menu-toggle>
 			<ion-menu-toggle>
-			<ion-button expand="block" @click="goTo('/files')">Files</ion-button>
+				<ion-button expand="block" @click="goTo('/files')">Files</ion-button>
 			</ion-menu-toggle>
 		</ion-content>
 	</ion-menu>
@@ -21,7 +21,8 @@
 
 <script  lang="ts">
 import { useAuthStore } from "@/store/auth.store";
-import { IonMenu, IonMenuToggle, IonHeader, IonToolbar, IonContent, IonTitle, IonButton, useIonRouter } from "@ionic/vue";
+import { navigationAnimation } from "@/utils/animations";
+import { IonMenu, IonMenuToggle, IonHeader, IonToolbar, IonContent, IonTitle, IonButton, useIonRouter, AnimationBuilder, createAnimation } from "@ionic/vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -37,8 +38,11 @@ export default defineComponent({
 	setup() {
 		const authStore = useAuthStore();
 		const router = useIonRouter();
+		const routerAnimation: AnimationBuilder = navigationAnimation;
 		const goTo = (link: string) => {
-			router.push(link);
+			router.push(link,
+				routerAnimation
+			);
 		}
 		return {
 			goTo,
@@ -48,6 +52,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

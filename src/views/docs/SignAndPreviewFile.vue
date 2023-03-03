@@ -7,7 +7,7 @@
 					<ion-row class="ion-justify-content-center ion-align-items-center">
 						<ion-col size="auto">
 							<ion-buttons>
-								<ion-back-button default-href="/files">
+								<ion-back-button default-href="/files" @click="goBack">
 								</ion-back-button>
 							</ion-buttons>
 						</ion-col>
@@ -148,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonItem, IonCheckbox, IonButton, IonSpinner, IonLabel, IonFab, IonFabButton, IonIcon, alertController, IonImg, IonSlides, IonSlide, IonGrid, IonCol, IonRow } from '@ionic/vue';
+import { IonItem, IonCheckbox, IonButton, IonSpinner, IonLabel, IonFab, IonFabButton, IonIcon, alertController, IonImg, IonSlides, IonSlide, IonGrid, IonCol, IonRow, useIonRouter } from '@ionic/vue';
 import { pencil, checkmark, close, arrowUp, arrowDown } from 'ionicons/icons';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton } from '@ionic/vue';
 import VuePdfEmbed from 'vue-pdf-embed'
@@ -160,6 +160,7 @@ import { isPlatform } from '@ionic/vue';
 import { FileSignature } from '@/models/file_signature.model';
 import { fabric } from 'fabric';
 import { cropBase64Image } from '@/utils/crop';
+import { goRightAnimation } from '@/utils/animations';
 // const isPlatform = (test: any) => false;
 const showAllPages = ref(true);
 const selectedSection = ref<HTMLElement>();
@@ -181,6 +182,13 @@ const lastDragEvt = ref<DragEvent>();
 const selectedFileSignature = ref<FileSignature | undefined>(undefined);
 const signingByHand = ref(false);
 const menu = ref(false);
+const router = useIonRouter();
+
+const goBack = () => {
+	router.back(goRightAnimation);
+};
+
+
 const pointerI = (e:any)=>{
 	console.log(e);
 }
@@ -879,6 +887,7 @@ function fillSectionDataset(section: HTMLElement, currentFileSignature: FileSign
 	section.dataset.isHandwritten = currentFileSignature?.isHandwritten.toString();
 
 }
+
 </script>
 <style>
 .openSig {
