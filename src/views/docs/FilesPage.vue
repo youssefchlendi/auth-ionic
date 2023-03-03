@@ -1,38 +1,64 @@
 <template>
 	<master-layout pageTitle="Manage files">
+		<div class="ion-padding">
 
-		<ion-card>
+			<!-- title -->
+			<!-- Available files -->
+			<!-- <ion-card>
 			<ion-card-header>
 				<ion-card-title>Upload File</ion-card-title>
 			</ion-card-header>
-			<!-- input -->
 			<ion-item>
-				<input type="file" accept="application/pdf" @change="convert64" ref="file" required />
 			</ion-item>
-			<!-- button -->
 			<ion-button @click="saveFile()" expand="full">Upload</ion-button>
-		</ion-card>
-		<ion-list>
-			<ion-item-sliding v-for="file in store.files" :key="file.id">
-				<ion-item >
-					{{ file.name }}
-				</ion-item>
+		</ion-card> -->
+		<input style="visibility: hidden;" type="file" accept="application/pdf" @change="convert64" ref="file" required />
+
+			<ion-list>
+				<ion-list-header>
+				<ion-label>Available files</ion-label>
+				</ion-list-header>
+				<ion-item-sliding v-for="file in store.files" :key="file.id">
+					<ion-item>
+						{{ file.name }}
+					</ion-item>
 
 					<ion-item-options>
-						<ion-item-option v-if="authStore.canSignDocuments" @click="goToFile(file.id)" color="primary" ><ion-icon :icon="pencil"/></ion-item-option>
-						<ion-item-option v-else @click="goToFile(file.id)" color="secondary"><ion-icon :icon="eye"/></ion-item-option>
-						<ion-item-option @click="deleteFile(file)" color="danger"><ion-icon :icon="trash"/></ion-item-option>
+						<ion-item-option v-if="authStore.canSignDocuments" @click="goToFile(file.id)"
+							color="primary"><ion-icon :icon="pencil" /></ion-item-option>
+						<ion-item-option v-else @click="goToFile(file.id)" color="secondary"><ion-icon
+								:icon="eye" /></ion-item-option>
+						<ion-item-option @click="deleteFile(file)" color="danger"><ion-icon
+								:icon="trash" /></ion-item-option>
 					</ion-item-options>
-			</ion-item-sliding>
-		</ion-list>
+				</ion-item-sliding>
+			</ion-list>
+			<ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="!pdfFile">
+				<ion-fab-button @click="addFile()">
+					<ion-icon :icon="add" />
+				</ion-fab-button>
+			</ion-fab>
+			
+			<ion-fab slot="fixed"  vertical="bottom" horizontal="start" v-if="pdfFile">
+				<ion-fab-button color="danger" @click="cancel()">
+					<ion-icon :icon="close" />
+				</ion-fab-button>
+			</ion-fab>
+			
+			<ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="pdfFile">
+				<ion-fab-button color="success" @click="saveFile()">
+					<ion-icon :icon="arrowUp" />
+				</ion-fab-button>
+			</ion-fab>
+		</div>
 
 	</master-layout>
 </template>
 
 <script setup lang="ts">
-import { IonIcon,IonItemOptions, IonItemOption, IonItemSliding, toastController, alertController, IonButtons, IonList, modalController, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonItem, IonCardHeader, IonCardTitle, IonButton, useIonRouter } from '@ionic/vue';
+import { IonLabel, IonListHeader, IonFab, IonFabButton, IonIcon, IonItemOptions, IonItemOption, IonItemSliding, toastController, alertController, IonButtons, IonList, modalController, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonItem, IonCardHeader, IonCardTitle, IonButton, useIonRouter } from '@ionic/vue';
 import { ref } from 'vue';
-import { pencil, eye, trash } from 'ionicons/icons';
+import { pencil, eye, trash, add, close, arrowUp } from 'ionicons/icons';
 import FileForm from '@/components/files/fileForm.vue';
 import { useFilesStore } from '@/store/files.store';
 import { File } from "@/models/Files.model";
@@ -53,6 +79,11 @@ const convert64 = (e: any) => {
 	reader.readAsDataURL(file);
 }
 
+const addFile = () => {
+	const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+	fileInput.click();
+}
+
 const saveFile = async () => {
 	if (pdfFile.value == null) {
 		const alert = await alertController.create({
@@ -68,18 +99,50 @@ const saveFile = async () => {
 	displayModal(pdfFile.value);
 }
 
+const cancel = () => {
+	pdfFile.value = null;
+}
+
 const displayModal = async (file: string | null) => {
-	const modal = await modalController.create({
-		component: FileForm,
+	alertController.create({
+		header: 'File Name',
+		inputs: [
+			{
+				name: 'name',
+				type: 'text',
+				placeholder: 'File Name'
+			}
+		],
+		buttons: [
+			{
+				text: 'Cancel',
+				role: 'cancel',
+				cssClass: 'secondary',
+				handler: () => {
+					console.log('Confirm Cancel');
+				}
+			}, {
+				text: 'Ok',
+				handler: (data) => {
+					store.addFile(pdfFile.value as string, data.name);
+					pdfFile.value = null;
+				}
+			}
+		]
+	}).then((alert) => {
+		alert.present();
 	});
-	modal.present();
+	// const modal = await modalController.create({
+	// 	component: FileForm,
+	// });
+	// modal.present();
 
-	const { data, role } = await modal.onWillDismiss();
+	// const { data, role } = await modal.onWillDismiss();
 
-	if (role === 'confirm' && file) {
-		store.addFile(file, data ? data : filename.value);
-		pdfFile.value = null;
-	}
+	// if (role === 'confirm' && file) {
+	// 	store.addFile(file, data ? data : filename.value);
+	// 	pdfFile.value = null;
+	// }
 };
 
 
@@ -122,7 +185,7 @@ const deleteFile = async (file: File) => {
 
 
 const goToFile = (id: number) => {
-	router.push(`/signandpreviewfile/${id}`,goLeftAnimation);
+	router.push(`/signandpreviewfile/${id}`, goLeftAnimation);
 }
 
 </script>
