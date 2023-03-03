@@ -6,6 +6,7 @@ import RegisterPage from '../views/RegisterPage.vue'
 import { useAuthStore } from '@/store/auth.store';
 import { pinia } from '@/main';
 import TabsPage from '../views/docs/TabsPage.vue'
+import FilesPage from '../views/docs/FilesPage.vue'
 import sig from '../views/docs/SignaturesPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -46,7 +47,7 @@ const routes: Array<RouteRecordRaw> = [
 	},
 	{
 		path: '/files',
-		component: () => import('@/views/docs/FilesPage.vue'),
+		component: FilesPage,
 		meta: {
 			requiresAuth: true
 		}

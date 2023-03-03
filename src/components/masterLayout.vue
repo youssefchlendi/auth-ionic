@@ -1,7 +1,5 @@
 <template>
-	<ion-page>
-	<main-menu v-if="authStore.isLoggedIn"/>
-	<div class="ion-page" id="main-content">
+	<ion-page class="ion-page" >
 		<ion-header>
 			<ion-toolbar>
 				<ion-buttons slot="start">
@@ -18,7 +16,6 @@
 		<ion-content>
 			<slot> </slot>
 		</ion-content>
-	</div>
 </ion-page>
 </template>
 <script lang="ts">
@@ -34,7 +31,6 @@ IonIcon,
 IonButton,
 } from "@ionic/vue";
 import {logOutOutline} from 'ionicons/icons';
-import MainMenu from '@/components/MainMenu.vue';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'vue-router';
 export default {
@@ -46,7 +42,6 @@ export default {
 		IonButtons,
 		IonButton,
 		IonMenuButton,
-		MainMenu,
 		IonIcon,
 		IonPage
 	},

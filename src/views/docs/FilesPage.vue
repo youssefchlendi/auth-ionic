@@ -1,6 +1,5 @@
 <template>
 	<master-layout pageTitle="Manage files">
-		<div>
 
 		<ion-card>
 			<ion-card-header>
@@ -23,7 +22,6 @@
 				</ion-buttons>
 			</ion-item>
 		</ion-list>
-	</div>
 
 	</master-layout>
 </template>

@@ -63,7 +63,7 @@
 <script lang="ts">
 import { useServiceStore } from "@/store/service.store";
 import {
-	IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonNote, IonButtons, toastController, IonCol, IonRow
+	IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonNote, IonButtons, toastController, IonCol, IonRow, useIonRouter
 } from "@ionic/vue";
 import { useRouter } from 'vue-router';
 import { defineComponent } from 'vue';
@@ -87,11 +87,12 @@ export default defineComponent({
 		const serviceStore = useServiceStore();
 		const authStore = useAuthStore();
 
-		const router = useRouter();
+		const router = useIonRouter();
 		// if(serviceStore.serviceUri)router.push('/login');
 		return {
 			serviceStore,
-			authStore
+			authStore,
+			router
 		};
 	},
 	data() {
@@ -162,7 +163,7 @@ export default defineComponent({
 					duration: 2000,
 					color: "success"
 				}).then(toast => toast.present());
-				this.$router.push('/home');
+				this.router.push('/home');
 			} else {
 				this.authStore.loginErrors.errors ? Object.entries(this.authStore.loginErrors.errors).forEach((error: any) => {
 					console.log(error);
