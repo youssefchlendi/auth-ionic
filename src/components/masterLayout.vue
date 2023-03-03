@@ -29,10 +29,12 @@ import {
 	IonPage,
 IonIcon,
 IonButton,
+useIonRouter,
 } from "@ionic/vue";
 import {logOutOutline} from 'ionicons/icons';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'vue-router';
+import { fadeInOutAnimation } from '@/utils/animations';
 export default {
 	components: {
 		IonHeader,
@@ -50,13 +52,13 @@ export default {
 	],
 	setup() {
 		const authStore = useAuthStore();
-		const router = useRouter();
+		const router = useIonRouter();
 		
 		const logout = () => {
 			const res = authStore.logout();
 			console.log(res);
 			if (res) {
-				router.push('/login');
+				router.push('/login',fadeInOutAnimation);
 			}
 		};
 		return {

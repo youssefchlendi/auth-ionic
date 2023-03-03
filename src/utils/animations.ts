@@ -111,3 +111,57 @@ export const forwardAnimation = (baseEl: HTMLElement, opts:any) => {
 		.addAnimation([enteringAnimation, leavingAnimation]);
 		
 }
+
+export const fadeInOutAnimation = (baseEl: HTMLElement, opts:any) => {
+	const { enteringEl, leavingEl } = opts;
+
+	const enteringAnimation = createAnimation()
+		.duration(500)
+		.easing('cubic-bezier(0.36,0.66,0.04,1)')
+		.addAnimation([
+			createAnimation()
+				.addElement(enteringEl)
+				.fromTo('opacity', '0.01', '1')
+		]);
+
+	const leavingAnimation = createAnimation()
+		.duration(500)
+		.easing('cubic-bezier(0.36,0.66,0.04,1)')
+		.addAnimation([
+			createAnimation()
+				.addElement(leavingEl)
+				.fromTo('opacity', '1', '0')
+		]);
+
+	return createAnimation()
+		.addAnimation([enteringAnimation, leavingAnimation]);
+		
+}
+
+export const backwardAnimation = (baseEl: HTMLElement, opts:any) => {
+	const { enteringEl, leavingEl } = opts;
+
+	const enteringAnimation = createAnimation()
+		.duration(500)
+		.easing('cubic-bezier(0.36,0.66,0.04,1)')
+		.addAnimation([
+			createAnimation()
+				.addElement(enteringEl)
+				.fromTo('transform', 'translateY(-100%)', 'translateY(0%)')
+				.fromTo('opacity', '0.01', '1')
+		]);
+
+	const leavingAnimation = createAnimation()
+		.duration(500)
+		.easing('cubic-bezier(0.36,0.66,0.04,1)')
+		.addAnimation([
+			createAnimation()
+				.addElement(leavingEl)
+				.fromTo('transform', 'translateY(0%)', 'translateY(100%)')
+				.fromTo('opacity', '1', '0')
+		]);
+
+	return createAnimation()
+		.addAnimation([enteringAnimation, leavingAnimation]);
+		
+}

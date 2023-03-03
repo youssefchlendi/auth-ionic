@@ -1,5 +1,5 @@
 <template>
-	<ion-menu v-if="authStore.isLoggedIn" contentId="main-content">
+	<ion-menu type="push" v-if="authStore.isLoggedIn" contentId="main-content">
 		<ion-header>
 			<ion-toolbar>
 				<ion-title>Menu Content</ion-title>
@@ -40,8 +40,7 @@ export default defineComponent({
 		const router = useIonRouter();
 		const routerAnimation: AnimationBuilder = navigationAnimation;
 		const goTo = (link: string) => {
-			router.push(link,
-				routerAnimation
+			router.replace(link,
 			);
 		}
 		return {

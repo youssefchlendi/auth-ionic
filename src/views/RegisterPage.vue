@@ -39,7 +39,7 @@
 				<ion-row class="ion-padding">
 					<ion-col>
 						<span class="small-text">Already have an account?</span>
-						<router-link to="/login" class="small-text"> Login</router-link>
+						<a @click.prevent="goToLogin" class="small-text"> Login</a>
 					</ion-col>
 				</ion-row>
 
@@ -58,15 +58,16 @@
 import { computed, defineComponent, ref } from 'vue'
 import commons from "@/shared/common-ionic-components";
 import { useAuthStore } from '@/store/auth.store';
-import { toastController } from '@ionic/vue';
+import { toastController, useIonRouter } from '@ionic/vue';
 import { useRouter } from 'vue-router';
+import { backwardAnimation } from '@/utils/animations';
 export default defineComponent({
 	components: {
 		...commons
 	},
 	setup() {
 		const authStore = useAuthStore();
-		const router = useRouter();
+		const router = useIonRouter();
 		const userInfo = ref({
 			email: {
 				value: "",
@@ -86,6 +87,10 @@ export default defineComponent({
 		})
 		const loginMessage = ref("")
 		const submittedUri = ref(false)
+
+		const goToLogin = function () {
+			router.back(backwardAnimation);
+		}
 
 		const valid = computed(() => {
 			if (userInfo.value.email.validationMessage === "" && userInfo.value.password.validationMessage === "" && userInfo.value.name.validationMessage === "") {
@@ -181,7 +186,13 @@ export default defineComponent({
 		}
 
 		const cancel = function () {
-			userInfo.value.email.value = "";
+			if (userInfo.value.email.value !== "" || userInfo.value.password.value !== "" || userInfo.value.name.value !== ""){
+				userInfo.value.email.value = "";
+				userInfo.value.password.value = "";
+				userInfo.value.name.value = "";
+				return;
+			}
+			goToLogin();
 		}
 
 		return {
@@ -194,6 +205,7 @@ export default defineComponent({
 			register,
 			validate,
 			cancel,
+			goToLogin
 		}
 	}
 })
