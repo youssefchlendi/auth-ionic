@@ -17,64 +17,53 @@
 						<ion-col size="auto">
 							<ion-buttons>
 
-								<ion-button @click="menu = true" v-if="!menu">
+								<ion-button @click="menu = true" v-if="!menu && authStore.canSignDocuments">
 									<ion-icon :icon="arrowDown"></ion-icon>
 								</ion-button>
-								
-								<ion-button @click="menu = false" v-if="menu">
+
+								<ion-button @click="menu = false" v-if="menu && authStore.canSignDocuments">
 									<ion-icon :icon="arrowUp"></ion-icon>
 								</ion-button>
 							</ion-buttons>
 						</ion-col>
 					</ion-row>
-					<ion-row v-if="menu">
+					<ion-row v-if="menu && authStore.canSignDocuments">
 						<!-- carroussel -->
-						<ion-col size="12" >
+						<ion-col size="12">
 							<ion-slides class="signaturesmenu">
 								<ion-slide v-for="(sig, index) in signatureStore.signatures" :key="index">
-									<ion-img 
-										@dragstart="dragmouse($event, sig)"
-										@touchstart.prevent="touchstartDrag($event, sig, [], false)" @touchmove="touchmoveDrag" @touchend="touchendDrag"
-										style="width:100px;height:100px"
-										class="grabbable square imgSlider" width="100px" height="100px" 
+									<ion-img @dragstart="dragmouse($event, sig)"
+										@touchstart.prevent="touchstartDrag($event, sig, [], false)"
+										@touchmove="touchmoveDrag" @touchend="touchendDrag" style="width:100px;height:100px"
+										class="grabbable square imgSlider" width="100px" height="100px"
 										:src="sig.signature" />
 								</ion-slide>
 							</ion-slides>
 						</ion-col>
-						
+
 					</ion-row>
 				</ion-grid>
-				
+
 			</ion-toolbar>
 		</ion-header>
 		<ion-content :fullscreen="true">
-			<!-- <ion-slides style="height:300px;">
-				<ion-slide v-for="(sig, index) in signatureStore.signatures" :key="index">
-					<ion-img 
-						@contextmenu.prevent=""
-						@dragstart="dragmouse($event, sig)"
-						@touchstart.prevent="touchstartDrag($event, sig, [], false)" @touchmove="touchmoveDrag"
-						style="width:100px;height:100px"
-						class="grabbable square imgSlider" width="100px" height="100px" 
-						:src="sig.signature" />
-				</ion-slide>
-			</ion-slides> -->
 			<div class="footer " v-if="((isPlatform('capacitor'))) && !isDragging && false">
 				<ion-slides style="" :pager="false">
 					<ion-slide v-if="signatureStore.signatures.length == 0">
 						<h1>Slide 1</h1>
 					</ion-slide>
 					<ion-slide style="height:100px;width:100px;" v-for="sig in signatureStore.signatures" :key="sig.id">
-						<ion-img 
-							@dragstart="dragmouse($event, sig)"
-							@touchstart.prevent="touchstartDrag($event, sig, [], false)" @touchmove="touchmoveDrag($event,true)"
-							@touchend="touchendDrag" style="width:100px;height:100px" class="grabbable square mySigCar" width="100px"
-							height="100px" :draggable="true" :src="sig.signature" />
+						<ion-img @dragstart="dragmouse($event, sig)"
+							@touchstart.prevent="touchstartDrag($event, sig, [], false)"
+							@touchmove="touchmoveDrag($event, true)" @touchend="touchendDrag"
+							style="width:100px;height:100px" class="grabbable square mySigCar" width="100px" height="100px"
+							:draggable="true" :src="sig.signature" />
 					</ion-slide>
 				</ion-slides>
 			</div>
-			
-			<div id="delete-mobile" class="footer danger-footer" v-show="(isPlatform('capacitor') && isDragging)">
+
+			<div id="delete-mobile" class="footer danger-footer"
+				v-show="(isPlatform('capacitor') && isDragging && authStore.canSignDocuments)">
 				<h1>
 					Drop here to delete
 				</h1>
@@ -112,14 +101,16 @@
 				</ion-row>
 
 			</ion-grid>
-			<ion-fab @click="deleteSignature" color="danger" v-if="selectedSection && !isPlatform('capacitor')" slot="fixed"
+			<ion-fab @click="deleteSignature" color="danger"
+				v-if="selectedSection && !isPlatform('capacitor') && authStore.canSignDocuments" slot="fixed"
 				vertical="bottom" horizontal="start">
 				<ion-fab-button>
 					<ion-icon :icon="pencil"></ion-icon>
 				</ion-fab-button>
 			</ion-fab>
 
-			<ion-fab @click="signByHand" v-if="(selectedPage != -1 && !signingByHand) || !showAllPages" slot="fixed"
+			<ion-fab @click="signByHand"
+				v-if="(selectedPage != -1 && !signingByHand) || !showAllPages && authStore.canSignDocuments" slot="fixed"
 				vertical="bottom" horizontal="end">
 				<ion-fab-button>
 					<ion-icon :icon="pencil"></ion-icon>
@@ -127,12 +118,14 @@
 			</ion-fab>
 
 
-			<ion-fab @click="validateSignByHand" v-if="signingByHand" slot="fixed" vertical="bottom" horizontal="end">
+			<ion-fab @click="validateSignByHand" v-if="signingByHand && authStore.canSignDocuments" slot="fixed"
+				vertical="bottom" horizontal="end">
 				<ion-fab-button color="success">
 					<ion-icon :icon="checkmark"></ion-icon>
 				</ion-fab-button>
 			</ion-fab>
-			<ion-fab @click="cancelSignByHand" v-if="signingByHand" slot="fixed" vertical="bottom" horizontal="start">
+			<ion-fab @click="cancelSignByHand" v-if="signingByHand && authStore.canSignDocuments" slot="fixed"
+				vertical="bottom" horizontal="start">
 				<ion-fab-button color="danger">
 					<ion-icon :icon="close"></ion-icon>
 				</ion-fab-button>
@@ -161,7 +154,10 @@ import { FileSignature } from '@/models/file_signature.model';
 import { fabric } from 'fabric';
 import { cropBase64Image } from '@/utils/crop';
 import { goRightAnimation } from '@/utils/animations';
+import { useAuthStore } from '@/store/auth.store';
 // const isPlatform = (test: any) => false;
+
+const authStore = useAuthStore();
 const showAllPages = ref(true);
 const selectedSection = ref<HTMLElement>();
 const route = useRoute();
@@ -189,108 +185,113 @@ const goBack = () => {
 };
 
 
-const pointerI = (e:any)=>{
-	console.log(e);
-}
 const validateSignByHand = async () => {
-	try {
-		const canvas = document.querySelectorAll(`.canvas-container`)[0] as HTMLElement;
-		const myCanvasSignature = canvas?.firstChild as HTMLCanvasElement;
+	if (authStore.canSignDocuments) {
+		try {
+			const canvas = document.querySelectorAll(`.canvas-container`)[0] as HTMLElement;
+			const myCanvasSignature = canvas?.firstChild as HTMLCanvasElement;
 
-		const base64 = myCanvasSignature.toDataURL("image/png").split(",")[1];
-		console.log(myCanvasSignature.toDataURL("image/png"));
-		// eslint-disable-next-line prefer-const
-		let { img, left, top, right, bottom } = await cropBase64Image(base64);
+			const base64 = myCanvasSignature.toDataURL("image/png").split(",")[1];
+			console.log(myCanvasSignature.toDataURL("image/png"));
+			// eslint-disable-next-line prefer-const
+			let { img, left, top, right, bottom } = await cropBase64Image(base64);
 
-		signatureStore.addSignature('data:image/png;base64,' + img, store.getFileById(parseInt(route.params.id as string))?.name + ' - ' + (selectedPage.value + 1),true)
+			signatureStore.addSignature('data:image/png;base64,' + img, store.getFileById(parseInt(route.params.id as string))?.name + ' - ' + (selectedPage.value + 1), true)
 
-		const data = 'data:image/png;base64,' + img;
+			const data = 'data:image/png;base64,' + img;
 
-		const bi = new Image();
-		bi.src = data;
-		bi.onload = async () => {
+			const bi = new Image();
+			bi.src = data;
+			bi.onload = async () => {
 
-			let droppedX = left;
-			let droppedY = top;
+				let droppedX = left;
+				let droppedY = top;
 
-			const scaleImageCoef = 1;
-			bi.width = bi.width * scaleImageCoef;
-			bi.height = bi.height * scaleImageCoef;
-			const windowWidth = document.body.offsetWidth;
-			const spacingX = (document.querySelectorAll(".vue-pdf-embed")[0] as HTMLElement).offsetLeft * 2;
-			const scaleCoef = 1;
-			droppedX = droppedX * scaleCoef;
-			droppedY = droppedY * scaleCoef;
+				const scaleImageCoef = 1;
+				bi.width = bi.width * scaleImageCoef;
+				bi.height = bi.height * scaleImageCoef;
+				const windowWidth = document.body.offsetWidth;
+				const spacingX = (document.querySelectorAll(".vue-pdf-embed")[0] as HTMLElement).offsetLeft * 2;
+				const scaleCoef = 1;
+				droppedX = droppedX * scaleCoef;
+				droppedY = droppedY * scaleCoef;
 
-			droppedX = droppedX * 1 / 3;
-			droppedY = droppedY * 1 / 3;
-			left = left * 1 / 3;
-			top = top * 1 / 3;
-			right = right * 1 / 3;
-			bottom = bottom * 1 / 3;
-
-
-			const currentFileSignature: FileSignature | undefined = await store.signDocument(
-				parseInt(route.params.id as string),
-				data,
-				droppedX,
-				droppedY,
-				(right - left),
-				(bottom - top),
-				showAllPages.value ? selectedPage.value : (page.value ?? 1) - 1,
-				(windowWidth - spacingX),
-				true
-			) ?? undefined;
-
-			// createAndAppendSection(
-			// 	currentFileSignature,
-			// 	(droppedY),
-			// 	(droppedX),
-			// 	right,
-			// 	left,
-			// 	bottom,
-			// 	top,
-			// 	data
-			// );
+				droppedX = droppedX * 1 / 3;
+				droppedY = droppedY * 1 / 3;
+				left = left * 1 / 3;
+				top = top * 1 / 3;
+				right = right * 1 / 3;
+				bottom = bottom * 1 / 3;
 
 
+				const currentFileSignature: FileSignature | undefined = await store.signDocument(
+					parseInt(route.params.id as string),
+					data,
+					droppedX,
+					droppedY,
+					(right - left),
+					(bottom - top),
+					showAllPages.value ? selectedPage.value : (page.value ?? 1) - 1,
+					(windowWidth - spacingX),
+					true
+				) ?? undefined;
 
-			await loadSignatures();
+				// createAndAppendSection(
+				// 	currentFileSignature,
+				// 	(droppedY),
+				// 	(droppedX),
+				// 	right,
+				// 	left,
+				// 	bottom,
+				// 	top,
+				// 	data
+				// );
 
-			signingByHand.value = false
-			canvas.remove();
 
+
+				await loadSignatures();
+
+				signingByHand.value = false
+				canvas.remove();
+
+			}
+		} catch (error: any) {
+			console.log(error);
 		}
-	} catch (error: any) {
-		console.log(error);
 	}
 
 }
 const cancelSignByHand = () => {
-	const canvas = document.querySelectorAll(`.canvas-container`)[0] as HTMLElement;
-	signingByHand.value = false
-	canvas.remove();
+	if (authStore.canSignDocuments) {
+
+		const canvas = document.querySelectorAll(`.canvas-container`)[0] as HTMLElement;
+		signingByHand.value = false
+		canvas.remove();
+	}
 }
 const signByHand = () => {
-	signingByHand.value = true;
-	console.log
-	let canvas = document.querySelector(`#canvas${showAllPages.value ? selectedPage.value : 0}`) as HTMLCanvasElement;
-	const canvasCopy = canvas?.cloneNode(true) as HTMLCanvasElement;
+	if (authStore.canSignDocuments) {
 
-	canvas?.parentNode?.append(canvasCopy);
+		signingByHand.value = true;
+		console.log
+		let canvas = document.querySelector(`#canvas${showAllPages.value ? selectedPage.value : 0}`) as HTMLCanvasElement;
+		const canvasCopy = canvas?.cloneNode(true) as HTMLCanvasElement;
 
-	new fabric.Canvas(canvas?.parentNode?.lastChild as HTMLCanvasElement, {
-		isDrawingMode: true,
-		preserveObjectStacking: true,
-		width: canvas.offsetWidth,
-		height: canvas.offsetHeight,
+		canvas?.parentNode?.append(canvasCopy);
 
-	});
-	canvas = document.querySelector(`#canvas${showAllPages.value ? selectedPage.value : 0}`) as HTMLCanvasElement;
+		new fabric.Canvas(canvas?.parentNode?.lastChild as HTMLCanvasElement, {
+			isDrawingMode: true,
+			preserveObjectStacking: true,
+			width: canvas.offsetWidth,
+			height: canvas.offsetHeight,
 
-	const cc = (canvas?.parentNode as HTMLElement).lastChild as HTMLCanvasElement;
-	cc.style.position = 'absolute';
-	cc.style.top = '0';
+		});
+		canvas = document.querySelector(`#canvas${showAllPages.value ? selectedPage.value : 0}`) as HTMLCanvasElement;
+
+		const cc = (canvas?.parentNode as HTMLElement).lastChild as HTMLCanvasElement;
+		cc.style.position = 'absolute';
+		cc.style.top = '0';
+	}
 
 }
 const handleDocumentRender = async () => {
@@ -307,7 +308,9 @@ watch(
 			return;
 		}
 		page.value = 1;
-		initListeners();
+		if (authStore.canSignDocuments) {
+			initListeners();
+		}
 	}
 );
 
@@ -328,262 +331,272 @@ const nextPage = () => {
 }
 
 const initListeners = () => {
-	const divsInsideVuePdfEmbed = document.querySelectorAll('.vue-pdf-embed > div');
+	if (authStore.canSignDocuments) {
+		const divsInsideVuePdfEmbed = document.querySelectorAll('.vue-pdf-embed > div');
 
-	divsInsideVuePdfEmbed.forEach((div: Element, index) => {
-		const canvas = div.firstChild as HTMLCanvasElement;
-		canvas.id = `canvas${index}`;
+		divsInsideVuePdfEmbed.forEach((div: Element, index) => {
+			const canvas = div.firstChild as HTMLCanvasElement;
+			canvas.id = `canvas${index}`;
 
-		canvas.classList.add('myCanvas');
-		canvas.addEventListener('dragover', (ev) => {
-			canvas.classList.add('dragover');
-			ev.preventDefault();
-		});
-		canvas.addEventListener('drop', (ev) => {
-			if (draggedItem.value) {
-				store.deleteSignature(draggedItem.value.fs);
-				draggedItem.value.section.remove();
-			}
-			if (lastDragEvt.value == ev) {
-				return;
-			}
-			lastDragEvt.value = ev;
-			canvas.classList.remove('dragover');
-			div.children[1].classList.remove('hide');
-			ev.preventDefault();
-			selectedPage.value = index;
-			currentPageCanvas.value = div.firstChild as HTMLCanvasElement;
-			currentPageAnnotationLayer.value = div.children[2] as HTMLDivElement;
-			currentPageTextLayer.value = div.children[1] as HTMLDivElement;
-			const data = ev.dataTransfer?.getData('text');
-			addSignature(data as string, ev.offsetX, ev.offsetY);
-		});
-
-		div.addEventListener('dragover', () => {
-			div.children[1].classList.add('hide');
-		});
-
-		canvas.addEventListener('dragleave', (ev) => {
-			ev.preventDefault();
-			div.children[1].classList.remove('hide');
-		});
-
-		canvas.addEventListener('mouseleave', (ev) => {
-			ev.preventDefault();
-			div.children[1].classList.remove('hide');
-		});
-		div.addEventListener('click', () => {
-			if (signingByHand.value) {
-				return;
-			}
-			if (selectedPage.value != index) {
-				divsInsideVuePdfEmbed[selectedPage.value]?.classList.remove('selected');
+			canvas.classList.add('myCanvas');
+			canvas.addEventListener('dragover', (ev) => {
+				canvas.classList.add('dragover');
+				ev.preventDefault();
+			});
+			canvas.addEventListener('drop', (ev) => {
+				if (draggedItem.value) {
+					store.deleteSignature(draggedItem.value.fs);
+					draggedItem.value.section.remove();
+				}
+				if (lastDragEvt.value == ev) {
+					return;
+				}
+				lastDragEvt.value = ev;
+				canvas.classList.remove('dragover');
+				div.children[1].classList.remove('hide');
+				ev.preventDefault();
 				selectedPage.value = index;
-				divsInsideVuePdfEmbed[selectedPage.value].classList.add('selected');
 				currentPageCanvas.value = div.firstChild as HTMLCanvasElement;
 				currentPageAnnotationLayer.value = div.children[2] as HTMLDivElement;
 				currentPageTextLayer.value = div.children[1] as HTMLDivElement;
-			} else {
-				divsInsideVuePdfEmbed[selectedPage.value].classList.remove('selected');
-				selectedPage.value = -1;
-			}
+				const data = ev.dataTransfer?.getData('text');
+				addSignature(data as string, ev.offsetX, ev.offsetY);
+			});
+
+			div.addEventListener('dragover', () => {
+				div.children[1].classList.add('hide');
+			});
+
+			canvas.addEventListener('dragleave', (ev) => {
+				ev.preventDefault();
+				div.children[1].classList.remove('hide');
+			});
+
+			canvas.addEventListener('mouseleave', (ev) => {
+				ev.preventDefault();
+				div.children[1].classList.remove('hide');
+			});
+			div.addEventListener('click', () => {
+				if (signingByHand.value) {
+					return;
+				}
+				if (selectedPage.value != index) {
+					divsInsideVuePdfEmbed[selectedPage.value]?.classList.remove('selected');
+					selectedPage.value = index;
+					divsInsideVuePdfEmbed[selectedPage.value].classList.add('selected');
+					currentPageCanvas.value = div.firstChild as HTMLCanvasElement;
+					currentPageAnnotationLayer.value = div.children[2] as HTMLDivElement;
+					currentPageTextLayer.value = div.children[1] as HTMLDivElement;
+				} else {
+					divsInsideVuePdfEmbed[selectedPage.value].classList.remove('selected');
+					selectedPage.value = -1;
+				}
+			});
 		});
-	});
+	}
 }
 
 const addSignature = (data: string, x: number, y: number, init = false, initAnnotationLayer: (HTMLDivElement | undefined) = undefined, initCanvasLayer: (HTMLCanvasElement | undefined) = undefined, initTextLayer: (HTMLDivElement | undefined) = undefined, fileSignature: (FileSignature | undefined) = undefined, drawingMobile = false, isHandSignature = false) => {
-	const canvas = document.createElement('canvas');
-	canvas.width = 100;
-	canvas.height = 100;
-	const ctx = canvas.getContext('2d');
-	if (!ctx) {
-		return;
-	}
-	const bi = new Image();
-	bi.src = data;
-	bi.onload = async () => {
-		const droppedX = x;
-		const droppedY = y;
-		// coefficient that's the percentage of 100px of the page
-		let imageWidth = bi.width;
-		let imageHeight = bi.height;
-
-		const windowWidth = document.body.offsetWidth;
-		const spacingX = (document.querySelectorAll(".vue-pdf-embed")[0] as HTMLElement).offsetLeft * 2;
-
-		let canvasId = 0;
-		if (showAllPages.value) {
-			// get numeric value from current canvas id
-			canvasId = selectedPage.value;
-		} else {
-			canvasId = page.value ? (page.value - 1 < 0 ? 0 : page.value - 1) : 0;
+	if (authStore.canSignDocuments) {
+		const canvas = document.createElement('canvas');
+		canvas.width = 100;
+		canvas.height = 100;
+		const ctx = canvas.getContext('2d');
+		if (!ctx) {
+			return;
 		}
-		const myPage = document.getElementById(`canvas${showAllPages.value ? canvasId : 0}`) as HTMLCanvasElement;
-		const coefficient = 100 / (myPage?.offsetWidth ?? 1);
-		imageWidth = bi.width * coefficient;
-		imageHeight = bi.height * coefficient;
+		const bi = new Image();
+		bi.src = data;
+		bi.onload = async () => {
+			const droppedX = x;
+			const droppedY = y;
+			// coefficient that's the percentage of 100px of the page
+			let imageWidth = bi.width;
+			let imageHeight = bi.height;
 
-		let currentFileSignature: FileSignature | undefined = undefined;
-		if (!init) {
+			const windowWidth = document.body.offsetWidth;
+			const spacingX = (document.querySelectorAll(".vue-pdf-embed")[0] as HTMLElement).offsetLeft * 2;
 
-			currentFileSignature = await store.signDocument(
-				parseInt(route.params.id as string),
-				data,
-				droppedX,
-				droppedY,
-				imageWidth,
-				imageHeight,
-				canvasId,
-				myPage.offsetWidth,
-				draggedItem.value?.fs.isHandwritten ? draggedItem.value?.fs.isHandwritten : isHandSignature) ?? undefined;
+			let canvasId = 0;
+			if (showAllPages.value) {
+				// get numeric value from current canvas id
+				canvasId = selectedPage.value;
+			} else {
+				canvasId = page.value ? (page.value - 1 < 0 ? 0 : page.value - 1) : 0;
+			}
+			const myPage = document.getElementById(`canvas${showAllPages.value ? canvasId : 0}`) as HTMLCanvasElement;
+			const coefficient = 100 / (myPage?.offsetWidth ?? 1);
+			imageWidth = bi.width * coefficient;
+			imageHeight = bi.height * coefficient;
+
+			let currentFileSignature: FileSignature | undefined = undefined;
+			if (!init) {
+
+				currentFileSignature = await store.signDocument(
+					parseInt(route.params.id as string),
+					data,
+					droppedX,
+					droppedY,
+					imageWidth,
+					imageHeight,
+					canvasId,
+					myPage.offsetWidth,
+					draggedItem.value?.fs.isHandwritten ? draggedItem.value?.fs.isHandwritten : isHandSignature) ?? undefined;
+			}
+
+
+			const section = document.createElement('section');
+			const _fileSignature = draggedItem.value ? draggedItem.value.fs : (init ? fileSignature : currentFileSignature);
+			fillSectionDataset(section, _fileSignature);
+
+			section.classList.add('signature');
+			section.style.position = 'absolute';
+
+
+			const scale = windowWidth / (_fileSignature?.canvasWidth ?? 1);
+
+			console.log("scale", scale);
+
+			section.style.top = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${droppedY}px` : `${(droppedY - (_fileSignature?.height ?? 1) / 4) * scale}px`;
+			section.style.left = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${droppedX}px` : `${(droppedX - ((_fileSignature?.width ?? 1) / 4)) * scale}px`;
+
+			const img = document.createElement('img');
+
+			img.src = data;
+
+			if (_fileSignature?.isHandwritten) {
+
+				section.style.top = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${(droppedY)}px` : `${droppedY - imageHeight / 4}px`;
+				section.style.left = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${(droppedX)}px` : `${droppedX - imageWidth / 4}px`;
+
+				img.style.maxWidth = `${(_fileSignature.width ?? 1)}px`;
+				img.style.maxHeight = `${(_fileSignature.height ?? 1)}px`;
+				section.style.width = `${(_fileSignature.width ?? 1)}px`;
+				section.style.height = `${(_fileSignature.height ?? 1)}px`;
+			} else {
+				// bi.width = 1000;
+				// bi.height = 1000;
+
+
+				// const coef =  window.innerWidth/(_fileSignature?.canvasWidth??1) ;
+				// bi.width = bi.width * coef;
+				// bi.height = bi.height * coef;
+
+				// if (parseInt(coef.toString())==1){
+				// 	const currentCanvas = document.querySelector(`#canvas${canvasId}`) as HTMLCanvasElement;
+				// 	bi.width = 0.1 * currentCanvas.width;
+				// 	bi.height = 0.1 * currentCanvas.height;
+				// }
+				section.style.maxWidth = `${imageWidth}px`;
+				section.style.maxHeight = `${imageHeight}px`;
+				section.style.minWidth = `${imageWidth}px`;
+				section.style.minHeight = `${imageHeight}px`;
+				section.style.width = `${imageWidth}px`;
+				section.style.height = `${imageHeight}px`;
+				img.style.maxWidth = `${imageWidth}px`;
+				img.style.maxHeight = `${imageHeight}px`;
+				img.style.minWidth = `${imageWidth}px`;
+				img.style.minHeight = `${imageHeight}px`;
+				img.style.width = `${imageWidth}px`;
+				img.style.height = `${imageHeight}px`;
+
+			}
+			section.style.zIndex = '100';
+
+			addEventListenersToSection(section, data, _fileSignature);
+
+
+			section.appendChild(img);
+
+			init ? initAnnotationLayer?.appendChild(section) : currentPageAnnotationLayer.value?.appendChild(section);
+
+
+
+			// loadSignatures();
 		}
-
-
-		const section = document.createElement('section');
-		const _fileSignature = draggedItem.value ? draggedItem.value.fs : (init ? fileSignature : currentFileSignature);
-		fillSectionDataset(section, _fileSignature);
-
-		section.classList.add('signature');
-		section.style.position = 'absolute';
-
-
-		const scale = windowWidth / (_fileSignature?.canvasWidth ?? 1);
-
-		console.log("scale", scale);
-
-		section.style.top = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${droppedY}px` : `${(droppedY - (_fileSignature?.height ?? 1) / 4) * scale}px`;
-		section.style.left = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${droppedX}px` : `${(droppedX - ((_fileSignature?.width ?? 1) / 4)) * scale}px`;
-
-		const img = document.createElement('img');
-
-		img.src = data;
-
-		if (_fileSignature?.isHandwritten) {
-
-			section.style.top = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${(droppedY)}px` : `${droppedY - imageHeight / 4}px`;
-			section.style.left = (draggedItem.value?.fs.isHandwritten || drawingMobile) ? `${(droppedX)}px` : `${droppedX - imageWidth / 4}px`;
-
-			img.style.maxWidth = `${(_fileSignature.width ?? 1)}px`;
-			img.style.maxHeight = `${(_fileSignature.height ?? 1)}px`;
-			section.style.width = `${(_fileSignature.width ?? 1)}px`;
-			section.style.height = `${(_fileSignature.height ?? 1)}px`;
-		} else {
-			// bi.width = 1000;
-			// bi.height = 1000;
-
-
-			// const coef =  window.innerWidth/(_fileSignature?.canvasWidth??1) ;
-			// bi.width = bi.width * coef;
-			// bi.height = bi.height * coef;
-
-			// if (parseInt(coef.toString())==1){
-			// 	const currentCanvas = document.querySelector(`#canvas${canvasId}`) as HTMLCanvasElement;
-			// 	bi.width = 0.1 * currentCanvas.width;
-			// 	bi.height = 0.1 * currentCanvas.height;
-			// }
-			section.style.maxWidth = `${imageWidth}px`;
-			section.style.maxHeight = `${imageHeight}px`;
-			section.style.minWidth = `${imageWidth}px`;
-			section.style.minHeight = `${imageHeight}px`;
-			section.style.width = `${imageWidth}px`;
-			section.style.height = `${imageHeight}px`;
-			img.style.maxWidth = `${imageWidth}px`;
-			img.style.maxHeight = `${imageHeight}px`;
-			img.style.minWidth = `${imageWidth}px`;
-			img.style.minHeight = `${imageHeight}px`;
-			img.style.width = `${imageWidth}px`;
-			img.style.height = `${imageHeight}px`;
-
-		}
-		section.style.zIndex = '100';
-
-		addEventListenersToSection(section, data, _fileSignature);
-
-
-		section.appendChild(img);
-
-		init ? initAnnotationLayer?.appendChild(section) : currentPageAnnotationLayer.value?.appendChild(section);
-
-		
-
-		// loadSignatures();
 	}
 
 }
 
 
 const deleteSignature = () => {
+	if (authStore.canSignDocuments) {
 
-	alertController.create(
-		{
-			header: 'Delete Signature',
-			message: 'Are you sure you want to delete this signature?',
-			buttons: [
-				{
-					text: 'Cancel',
-					role: 'cancel',
-					cssClass: 'secondary',
-					handler: () => {
-						selectedSection.value = undefined;
-					}
-				}, {
-					text: 'Okay',
-					handler: () => {
-						selectedSection.value?.remove();
-						if (selectedFileSignature.value) {
-							store.deleteSignature(selectedFileSignature.value);
+		alertController.create(
+			{
+				header: 'Delete Signature',
+				message: 'Are you sure you want to delete this signature?',
+				buttons: [
+					{
+						text: 'Cancel',
+						role: 'cancel',
+						cssClass: 'secondary',
+						handler: () => {
+							selectedSection.value = undefined;
 						}
-						selectedSection.value = undefined;
+					}, {
+						text: 'Okay',
+						handler: () => {
+							selectedSection.value?.remove();
+							if (selectedFileSignature.value) {
+								store.deleteSignature(selectedFileSignature.value);
+							}
+							selectedSection.value = undefined;
+						}
 					}
-				}
-			]
+				]
+			}
+		).then((alert) => {
+			alert.present();
 		}
-	).then((alert) => {
-		alert.present();
+		)
 	}
-	)
-
 }
 
 const loadSignatures = async () => {
-	try {
-		const signatures = store.file_signature_cache?.get(parseInt(route.params?.id as string));
-		if (showAllPages.value) {
+	if (authStore.canSignDocuments) {
+		try {
+			const signatures = store.file_signature_cache?.get(parseInt(route.params?.id as string));
+			if (showAllPages.value) {
 
-			signatures?.forEach(async (sig: FileSignature) => {
-				const signature = await signatureStore.getSignatureById(sig.signatureId);
-				if (signature) {
-					const initCanvas = document.querySelector(`#canvas${sig.pageNumber}`) as HTMLCanvasElement;
-					const initText = document.querySelector(`#canvas${sig.pageNumber}`)?.parentNode?.querySelector('.textLayer') as HTMLDivElement;
-					const initAnnotation = document.querySelector(`#canvas${sig.pageNumber}`)?.parentNode?.querySelector('.annotationLayer') as HTMLDivElement;
-					selectedPage.value = sig.pageNumber;
-					await addSignature(signature.signature, sig.posX, sig.posY, true, initAnnotation, initCanvas, initText, sig, sig.isHandwritten, sig.isHandwritten);
-				}
-			})
-		} else {
-			const sig = signatures?.filter((sig: FileSignature) => sig.pageNumber + 1 == page.value);
-			sig.forEach(async (sigi: FileSignature) => {
-				const signature = await signatureStore.getSignatureById(sigi.signatureId);
-				if (signature) {
-					const initCanvas = document.querySelector(`#canvas0`) as HTMLCanvasElement;
-					const initText = document.querySelector(`#canvas0`)?.parentNode?.querySelector('.textLayer') as HTMLDivElement;
-					const initAnnotation = document.querySelector(`#canvas0`)?.parentNode?.querySelector('.annotationLayer') as HTMLDivElement;
-					addSignature(signature.signature, sigi.posX, sigi.posY, true, initAnnotation, initCanvas, initText, sigi, sigi.isHandwritten, sigi.isHandwritten);
-				}
-			})
+				signatures?.forEach(async (sig: FileSignature) => {
+					const signature = await signatureStore.getSignatureById(sig.signatureId);
+					if (signature) {
+						const initCanvas = document.querySelector(`#canvas${sig.pageNumber}`) as HTMLCanvasElement;
+						const initText = document.querySelector(`#canvas${sig.pageNumber}`)?.parentNode?.querySelector('.textLayer') as HTMLDivElement;
+						const initAnnotation = document.querySelector(`#canvas${sig.pageNumber}`)?.parentNode?.querySelector('.annotationLayer') as HTMLDivElement;
+						selectedPage.value = sig.pageNumber;
+						await addSignature(signature.signature, sig.posX, sig.posY, true, initAnnotation, initCanvas, initText, sig, sig.isHandwritten, sig.isHandwritten);
+					}
+				})
+			} else {
+				const sig = signatures?.filter((sig: FileSignature) => sig.pageNumber + 1 == page.value);
+				sig.forEach(async (sigi: FileSignature) => {
+					const signature = await signatureStore.getSignatureById(sigi.signatureId);
+					if (signature) {
+						const initCanvas = document.querySelector(`#canvas0`) as HTMLCanvasElement;
+						const initText = document.querySelector(`#canvas0`)?.parentNode?.querySelector('.textLayer') as HTMLDivElement;
+						const initAnnotation = document.querySelector(`#canvas0`)?.parentNode?.querySelector('.annotationLayer') as HTMLDivElement;
+						addSignature(signature.signature, sigi.posX, sigi.posY, true, initAnnotation, initCanvas, initText, sigi, sigi.isHandwritten, sigi.isHandwritten);
+					}
+				})
+			}
+		} catch (error) {
+			console.log(error);
 		}
-	} catch (error) {
-		console.log(error);
 	}
 }
 
 onBeforeUnmount(() => {
-	const divsInsideVuePdfEmbed = document.querySelectorAll('.vue-pdf-embed > div');
-	divsInsideVuePdfEmbed.forEach((div: Element) => {
-		div.removeEventListener('click', () => {
-			div.classList.remove('selected');
+	if (authStore.canSignDocuments) {
+
+		const divsInsideVuePdfEmbed = document.querySelectorAll('.vue-pdf-embed > div');
+		divsInsideVuePdfEmbed.forEach((div: Element) => {
+			div.removeEventListener('click', () => {
+				div.classList.remove('selected');
+			});
 		});
-	});
+	}
 });
 
 /**
@@ -591,20 +604,25 @@ onBeforeUnmount(() => {
  */
 
 const dragmouse = (e: any, item: any) => {
-	e.dataTransfer.dropEffect = 'move'
-	e.dataTransfer.effectAllowed = 'move'
-	e.dataTransfer.setData('item', item)
+	if (authStore.canSignDocuments) {
+
+		e.dataTransfer.dropEffect = 'move'
+		e.dataTransfer.effectAllowed = 'move'
+		e.dataTransfer.setData('item', item)
+	}
 };
 
 
 const touchDragItem = ref<any>()
 const timing = ref<number>()
 const touchstartDrag = (e: any, item: any, arr: any, fromSection: boolean) => {
-	// This function is used to create the image element that will be used to display the signature
-	// The image is created as a new element and it's attributes are set
-	// The image is then appended to the app element
+	if (authStore.canSignDocuments) {
 
-	// Create a new image element
+		// This function is used to create the image element that will be used to display the signature
+		// The image is created as a new element and it's attributes are set
+		// The image is then appended to the app element
+
+		// Create a new image element
 		const image = document.createElement("img");
 		// Set its ID to "image-float"
 		image.setAttribute("id", "image-float");
@@ -651,54 +669,59 @@ const touchstartDrag = (e: any, item: any, arr: any, fromSection: boolean) => {
 		});
 		document.getElementById("app")?.appendChild(image);
 
-		
-	// const image = document.createElement("img");
-	// // Set its ID to "image-float"
-	// image.setAttribute("id", "image-float");
-	// // Set its source to the item's signature
-	// image.src = item.signature;
-	// // 10% of the width of the page
-	// const width = 0.1 * document.body.clientWidth;
-	// // 10% of the height of the page
-	// const height = 0.1 * document.body.clientHeight;
-	// // Set its width to 10% of the width of the page
-	// image.width = width;
-	// // Set its height to 10% of the height of the page
-	// image.height = height;
 
-	// // Set its position to absolute
-	// image.style.position = 'absolute';
+		// const image = document.createElement("img");
+		// // Set its ID to "image-float"
+		// image.setAttribute("id", "image-float");
+		// // Set its source to the item's signature
+		// image.src = item.signature;
+		// // 10% of the width of the page
+		// const width = 0.1 * document.body.clientWidth;
+		// // 10% of the height of the page
+		// const height = 0.1 * document.body.clientHeight;
+		// // Set its width to 10% of the width of the page
+		// image.width = width;
+		// // Set its height to 10% of the height of the page
+		// image.height = height;
 
-	// // Get the x position of the touch event
-	// const left = e.touches[0].pageX;
-	// // Get the y position of the touch event
-	// const top = e.touches[0].pageY;
-	// // Set the x position of the image to the x position of the touch event
-	// image.style.left = left + 'px';
-	// // Set the y position of the image to the y position of the touch event
-	// image.style.top = top + 'px';
+		// // Set its position to absolute
+		// image.style.position = 'absolute';
 
-	// // Set the touchDragItem value to the image element
-	// touchDragItem.value = image
-	// // Append the image to the document body
-	// document.getElementById('app')?.appendChild(image);
+		// // Get the x position of the touch event
+		// const left = e.touches[0].pageX;
+		// // Get the y position of the touch event
+		// const top = e.touches[0].pageY;
+		// // Set the x position of the image to the x position of the touch event
+		// image.style.left = left + 'px';
+		// // Set the y position of the image to the y position of the touch event
+		// image.style.top = top + 'px';
+
+		// // Set the touchDragItem value to the image element
+		// touchDragItem.value = image
+		// // Append the image to the document body
+		// document.getElementById('app')?.appendChild(image);
+	}
 };
 
-const touchmoveDrag = (e: any,fromCarrousel=false) => {
+const touchmoveDrag = (e: any, fromCarrousel = false) => {
+	if (authStore.canSignDocuments) {
+
 	// on touch move or dragging, we get the newly created image element
 	const image = document.getElementById('image-float')
 	// this will give us the dragging feeling of the element while actually it's a different element
 	const left = e.touches[0].pageX;
 	const top = e.touches[0].pageY;
-	!fromCarrousel?isDragging.value = true:isDragging.value = false;
+	!fromCarrousel ? isDragging.value = true : isDragging.value = false;
 	if (image) {
 		image.style.position = 'absolute'
 		image.style.left = left + 'px';
 		image.style.top = top + 'px';
 	}
+}
 
 };
 const touchendDrag = (e: TouchEvent) => {
+	if (authStore.canSignDocuments) {
 	console.log('touchendDrag');
 	(touchDragItem.value as HTMLImageElement).remove();
 	const deleteMobile = document.getElementById('delete-mobile');
@@ -747,7 +770,7 @@ const touchendDrag = (e: TouchEvent) => {
 	});
 
 
-	isDragging.value = false;
+	isDragging.value = false;}
 
 }
 
@@ -1030,10 +1053,8 @@ function fillSectionDataset(section: HTMLElement, currentFileSignature: FileSign
 
 }
 
-.signaturesmenu{
+.signaturesmenu {
 	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
 	border-radius: 20px;
 }
-
-
 </style>
