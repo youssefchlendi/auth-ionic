@@ -1,7 +1,9 @@
 <template>
 	<master-layout pageTitle="manage signatures">
 
-			<vue-signature-pad id="signature" width="100%" height="500px" ref="signaturePad" />
+			<div class="ion-padding">
+				<vue-signature-pad id="signature" width="100%" height="400px" ref="signaturePad" />
+			</div>
 			<div class="buttons">
 				<ion-button color="danger" @click="undo">Undo</ion-button>
 				<ion-button color="success" @click="save">Save</ion-button>
@@ -130,7 +132,7 @@ setTimeout(() => {
 }
 
 #signature {
-	border: double 3px transparent;
+	border: double 5px transparent;
 	border-radius: 5px;
 	background-image: linear-gradient(white, white),
 		radial-gradient(circle at top left, #4bc5e8, #9f6274);
